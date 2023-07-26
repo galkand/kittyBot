@@ -12,7 +12,14 @@ URL = 'https://api.thecatapi.com/v1/images/search'
 
 
 def get_new_image():
-    response = requests.get(URL).json()
+    try:
+        response = requests.get(URL)
+    except Exception as error:
+        print(error)
+        new_url = 'https://api.thedogapi.com/v1/images/search'
+        response = requests.get(new_url)
+
+    response = response.json()
     random_cat = response[0].get('url')
     return random_cat
 
@@ -31,12 +38,15 @@ def wake_up(update, context):
                              reply_markup=button)
 
 
-updater.dispatcher.add_handler(CommandHandler('start', wake_up))
-updater.dispatcher.add_handler(CommandHandler('newcat', new_cat))
+def main():
+    updater = Updater(token=secret_token)
+
+    updater.dispatcher.add_handler(CommandHandler('start', wake_up))
+    updater.dispatcher.add_handler(CommandHandler('newcat', new_cat))
+
+    updater.start_polling()
+    updater.idle()
 
 
-# Метод start_polling() запускает процесс polling,
-# приложение начнёт отправлять регулярные запросы для получения обновлений.
-updater.start_polling()
-# Бот будет работать до тех пор, пока не нажмете Ctrl-C
-updater.idle()
+if __name__ == '__main__':
+    main()
